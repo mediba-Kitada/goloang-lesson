@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
-	. "task"
+	"encoding/json" // jsonパッケージとしてコール可能
+	"log"
+	. "task" // .記法は、複数パッケージで利用出来る
+	. "person"
 )
 
 func main() {
@@ -58,5 +61,17 @@ func main() {
 
 	//a := int("a") // キャストに失敗した場合は、パニックが発生する
 
+	person := &Person{ // 構造体Personのポインタを代入
+		ID:	1,
+		Name:	"Gopher",
+		Email:	"gopher@example.org",
+		Age:	5,
+		Address:	"",
+	}
+	b, err := json.Marshal(person) // ポイントをencoding/json.Marshal()関数に渡す
+	if err != nil {
+		log.Fatal(err) // logパッケージFatal()関数
+	}
+	fmt.Println(string(b)) // 文字列に変換し、標準出力
 
 }
