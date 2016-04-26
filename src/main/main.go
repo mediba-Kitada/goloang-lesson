@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"encoding/json" // jsonパッケージとしてコール可能
 	"log"
+	"os"
 	. "task" // .記法は、複数パッケージで利用出来る
 	. "person"
 )
@@ -73,5 +74,43 @@ func main() {
 		log.Fatal(err) // logパッケージFatal()関数
 	}
 	fmt.Println(string(b)) // 文字列に変換し、標準出力
+
+	/* json.Encoder/Decoderを用いたJSON形式のファイル操作
+	io.Reader, io.Writerを中心として設計されたAPIが多数ある
+	*/
+	file, ioerr := os.Create("./person.json") // ファイル生成
+	if ioerr != nil {
+		log.Fatal(ioerr)
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file) // エンコードの取得
+	ioerr = encoder.Encode(person) // JSONエンコードしたデータの書き込み []byteに代入せず、personを直接*os.Fileに書き込み
+	if ioerr != nil {
+		log.Fatal(ioerr)
+	}
+
+	var person2 Person
+	b2 := []byte(`{"id":1,"name":"Gopher","age":5}`) //byte方のスライスにJSON文字列を代入
+	err2 := json.Unmarshal(b2, &person2) // encoding/json.Unmarshal()関数にスライスと構造体のポイントを渡す
+	if err2 != nil {
+		log.Fatal(err2)
+	}
+	fmt.Println(person2) // 構造体を標準出力
+
+	// json.Encoder/Decoderを用いたJSONファイルの読み出し/デコード
+	file, ioerr = os.Open("./person.json") // 生成済みのperson.jsonファイルを生成
+	if ioerr != nil {
+		log.Fatal(ioerr)
+	}
+	defer file.Close()
+
+	var person3 Person // デコードしたデータを書き込み変数
+	decoder := json.NewDecoder(file) // デコーダの取得
+	ioerr = decoder.Decode(&person3) // JSONデコードしたデータをperson3に代入
+	if ioerr != nil {
+		log.Fatal(ioerr)
+	}
+	fmt.Println(person3)
 
 }
